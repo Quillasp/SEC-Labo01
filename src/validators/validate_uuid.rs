@@ -10,6 +10,10 @@ pub fn validate_uuid(uuid: &str) -> bool {
     // TODO : implement logic
 
     let uuid = Uuid::try_parse(uuid);
+    match uuid {
+        Ok(_) => (),
+        Err(_) => return false,
+    }
     lazy_static! {
         static ref UUID_RULE: Regex = Regex::new(
             r"^[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$"

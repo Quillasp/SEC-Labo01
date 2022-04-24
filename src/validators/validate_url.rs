@@ -34,30 +34,26 @@ pub fn validate_url(url: &str, whitelist: Option<&Vec<&str>>) -> bool {
 #[cfg(test)]
 mod tests {
     use crate::*;
-    #[test]
-    fn validate_url_without_whitelist_pass() {
-        let urls = [
-            "http://www.example.com",
-            "http://wwrd.example.com",
-            "http://www.example..com",
-            "https://www.example.com",
-            "ftp://www.example.co.uk",
-            "ftps://www.example.com",
-            "www.example.com",
-            "example.com",
-            "a://b..eeee.c", // Ok d'accord, j'abuse peut-être un peu
-            "b..eeee.c/home.php",
-            "http://l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.org",
-            "http://tech.yahoo.com/rc/desktops/102;_ylt=Ao8yevQHlZ4On0O3ZJGXLEQFLZA5"
-        ];
+    use rstest::rstest;
 
-        for url in urls {
-            let res = validate_url(url, None);
-            if !res {
-                println!("{}", url);
-            }
-            assert_eq!(res, true);
-        }
+    #[rstest(
+        url,
+        case("http://www.example.com"),
+        case("http://wwrd.example.com"),
+        case("http://www.example..com"),
+        case("https://www.example.com"),
+        case("ftp://www.example.co.uk"),
+        case("ftps://www.example.com"),
+        case("www.example.com"),
+        case("example.com"),
+        case("a://b..eeee.c"), // Ok d'accord, j'abuse peut-être un peu
+        case("b..eeee.c/home.php"),
+        case("http://l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.org"),
+        case("http://tech.yahoo.com/rc/desktops/102;_ylt=Ao8yevQHlZ4On0O3ZJGXLEQFLZA5"),
+    )]
+    fn validate_url_pass(url: &str) {
+        let res = validate_url(url, None);
+        assert_eq!(res, true);
     }
 
     #[test]

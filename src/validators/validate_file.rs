@@ -4,9 +4,18 @@ use regex::Regex;
 // TODO : specify parameter type(s) and return type(s)
 pub fn validate_file(path: &str, extension: bool) -> bool {
     // TODO : implement logic
-    let kind = infer::get_from_path(path)
-        .expect("file read successfully")
-        .expect("file type is known");
+    let kind = match infer::get_from_path(path) {
+        Ok(kind) => match kind {
+            Some(kind) => kind,
+            None => {
+                return false;
+            }
+        },
+        Err(err) => {
+            println!("{}", err);
+            return false;
+        }
+    };
 
     match kind.matcher_type() {
         infer::MatcherType::Image | infer::MatcherType::Video => {
@@ -31,21 +40,21 @@ mod tests {
 
     #[test]
     fn validate_file_image_pass() {
-        let path = "./files/file_example_JPG_500kB.jpg";
+        let path = "files/file_example_JPG_500kB.jpg";
 
         assert_eq!(validate_file(path, false), true);
     }
 
     #[test]
     fn validate_file_image_with_extension_pass() {
-        let path = "./files/file_example_JPG_500kB.jpg";
+        let path = "files/file_example_JPG_500kB.jpg";
 
         assert_eq!(validate_file(path, true), true);
     }
 
     #[test]
     fn validate_file_video_pass() {
-        let path = "./files/file_example_AVI_480_750kB.avi";
+        let path = "files/file_example_AVI_480_750kB.avi";
 
         assert_eq!(validate_file(path, false), true);
     }
