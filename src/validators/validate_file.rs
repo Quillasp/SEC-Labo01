@@ -1,15 +1,52 @@
+use infer;
+use regex::Regex;
 // DO NOT READ FILE CONTENTS INSIDE THIS FUNCTION
 // TODO : specify parameter type(s) and return type(s)
-pub fn validate_file() {
+pub fn validate_file(url: &str, extension: bool) -> bool {
     // TODO : implement logic
+    let kind = infer::get_from_path(url)
+        .expect("file read successfully")
+        .expect("file type is known");
+
+    match kind.matcher_type() {
+        infer::MatcherType::Image | infer::MatcherType::Video => {
+            if extension {
+                let extension_rule = Regex::new(r"\.[^\.]*$").unwrap();
+                let exts = extension_rule.find(url).unwrap();
+                kind.extension()
+                    .to_string()
+                    .eq(&url[exts.start() + 1..exts.end()])
+            } else {
+                true
+            }
+        }
+        _ => false,
+    }
 }
 
 // TODO : implement unit testing
 #[cfg(test)]
 mod tests {
+    use crate::*;
+
     #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+    fn validate_file_image_pass() {
+        let path = "./files/file_example_JPG_500kB.jpg";
+
+        assert_eq!(validate_file(path, false), true);
+    }
+
+    #[test]
+    fn validate_file_image_with_extension_pass() {
+        let path = "./files/file_example_JPG_500kB.jpg";
+
+        assert_eq!(validate_file(path, true), true);
+    }
+
+    #[test]
+    fn validate_file_video_pass() {
+        let path = "./files/file_example_AVI_480_750kB.avi";
+
+        assert_eq!(validate_file(path, false), true);
     }
 }
