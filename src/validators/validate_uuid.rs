@@ -25,7 +25,13 @@ pub fn validate_uuid(uuid: &str) -> bool {
 }
 
 pub fn validate_file_uuid(path: &str, uuid: &str) -> bool {
-    let file_data = fs::read(path).unwrap();
+    let file_data = match fs::read(path) {
+        Ok(file_data) => file_data,
+        Err(e) => {
+            println!("{}", e);
+            return false;
+        }
+    };
     let buffer = file_data.as_slice();
     let file_uuid = Uuid::new_v5(&Uuid::NAMESPACE_OID, buffer);
     let file_uuid = file_uuid.to_string();
@@ -38,16 +44,39 @@ pub fn validate_file_uuid(path: &str, uuid: &str) -> bool {
 mod tests {
     use crate::*;
     #[test]
-    fn validate_uuid_format_hyphenated_pass() {
+    fn validate_uuid_format_hyphenated_ok() {
         let uuid = "b79cb3ba-745e-5d9a-8903-4a02327a7e09";
 
         assert_eq!(validate_uuid(uuid), true);
     }
 
     #[test]
-    fn validate_uuid_format_simple_pass() {
+    fn validate_uuid_format_simple_ok() {
         let uuid = "b79cb3ba745e5d9a89034a02327a7e09";
 
         assert_eq!(validate_uuid(uuid), true);
+    }
+
+    #[test]
+    fn validate_uuid_format_invalid_error() {
+        let uuid = "b79cb3ba-745e-5d9a-8903-4a02327a7e0";
+
+        assert_eq!(validate_uuid(uuid), false);
+    }
+
+    #[test]
+    fn validate_file_uuid_ok() {
+        let uuid = "e996c5f6-0f27-557a-858e-798da75ff427";
+        let path = "files/file_example_JPG_500kB.jpg";
+
+        assert_eq!(validate_file_uuid(path, uuid), true);
+    }
+
+    #[test]
+    fn validate_file_uuid_filepath_error() {
+        let uuid = "e996c5f6-0f27-557a-858e-798da75ff427";
+        let path = "files/file_example_JPG_500kB.jpeg";
+
+        assert_eq!(validate_file_uuid(path, uuid), false);
     }
 }

@@ -51,46 +51,38 @@ mod tests {
         case("http://l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.l.org"),
         case("http://tech.yahoo.com/rc/desktops/102;_ylt=Ao8yevQHlZ4On0O3ZJGXLEQFLZA5"),
     )]
-    fn validate_url_pass(url: &str) {
+    fn validate_url_without_whitelist_ok(url: &str) {
         let res = validate_url(url, None);
         assert_eq!(res, true);
     }
 
-    #[test]
-    fn validate_url_with_whitelist_pass() {
-        let urls = ["http://www.example.ch", "http://www.example.fr"];
-
+    #[rstest(url, case("http://www.example.ch"), case("http://www.example.fr"))]
+    fn validate_url_with_whitelist_ok(url: &str) {
         let whitelist = vec![".ch", ".fr"];
 
-        for url in urls {
-            let res = validate_url(url, Some(&whitelist));
-            assert_eq!(res, true);
-        }
+        let res = validate_url(url, Some(&whitelist));
+        assert_eq!(res, true);
     }
-
-    #[test]
-    // #[should_panic]
-    fn validate_url_with_whitelist_not_pass() {
-        let urls = ["http://www.example.com", "http://www.example.uk"];
-
+    #[rstest(url, case("http://www.example.com"), case("http://www.example.uk"))]
+    fn validate_url_with_whitelist_error(url: &str) {
         let whitelist = vec![".ch", ".fr"];
 
-        for url in urls {
-            let res = validate_url(url, Some(&whitelist));
-            assert_eq!(res, false);
-        }
+        let res = validate_url(url, Some(&whitelist));
+        assert_eq!(res, false);
     }
 
-    #[test]
+    #[rstest(url, case("http://www.example.com"), case("http://www.example.uk"))]
     #[should_panic]
-    fn validate_url_with_whitelist_wrong_not_pass() {
-        let urls = ["http://www.example.com", "http://www.example.uk"];
-
+    fn validate_url_with_whitelist_too_short_panic(url: &str) {
         let whitelist = vec![".h", ".fr"];
 
-        for url in urls {
-            let res = validate_url(url, Some(&whitelist));
-            assert_eq!(res, true);
-        }
+        let res = validate_url(url, Some(&whitelist));
+        assert_eq!(res, true);
+    }
+
+    #[rstest(url, case("h-tp://www.example.com"), case("f-tp://www.example"))]
+    fn validate_url_protocol_invalid(url: &str) {
+        let res = validate_url(url, None);
+        assert_eq!(res, false);
     }
 }

@@ -39,23 +39,37 @@ mod tests {
     use crate::*;
 
     #[test]
-    fn validate_file_image_pass() {
+    fn validate_file_image_ok() {
         let path = "files/file_example_JPG_500kB.jpg";
 
         assert_eq!(validate_file(path, false), true);
     }
 
     #[test]
-    fn validate_file_image_with_extension_pass() {
+    fn validate_file_image_with_extension_ok() {
         let path = "files/file_example_JPG_500kB.jpg";
 
         assert_eq!(validate_file(path, true), true);
     }
 
     #[test]
-    fn validate_file_video_pass() {
+    fn validate_file_video_ok() {
         let path = "files/file_example_AVI_480_750kB.avi";
 
         assert_eq!(validate_file(path, false), true);
+    }
+
+    #[test]
+    fn validate_file_image_no_extension_error() {
+        let path = "files/file_example_JPG_500kB";
+
+        assert_eq!(validate_file(path, false), false)
+    }
+
+    #[test]
+    fn validate_file_not_enough_perm_error() {
+        let path = "/etc/shadow";
+
+        assert_eq!(validate_file(path, false), false)
     }
 }
