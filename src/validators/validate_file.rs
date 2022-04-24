@@ -2,9 +2,9 @@ use infer;
 use regex::Regex;
 // DO NOT READ FILE CONTENTS INSIDE THIS FUNCTION
 // TODO : specify parameter type(s) and return type(s)
-pub fn validate_file(url: &str, extension: bool) -> bool {
+pub fn validate_file(path: &str, extension: bool) -> bool {
     // TODO : implement logic
-    let kind = infer::get_from_path(url)
+    let kind = infer::get_from_path(path)
         .expect("file read successfully")
         .expect("file type is known");
 
@@ -12,10 +12,10 @@ pub fn validate_file(url: &str, extension: bool) -> bool {
         infer::MatcherType::Image | infer::MatcherType::Video => {
             if extension {
                 let extension_rule = Regex::new(r"\.[^\.]*$").unwrap();
-                let exts = extension_rule.find(url).unwrap();
+                let exts = extension_rule.find(path).unwrap();
                 kind.extension()
                     .to_string()
-                    .eq(&url[exts.start() + 1..exts.end()])
+                    .eq(&path[exts.start() + 1..exts.end()])
             } else {
                 true
             }
