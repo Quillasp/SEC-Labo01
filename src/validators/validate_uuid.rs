@@ -2,7 +2,7 @@ use std::fs;
 
 use lazy_static::lazy_static;
 use regex::Regex;
-use uuid::Uuid;
+use uuid::{Uuid, Version};
 
 // DO NOT READ FILE CONTENTS INSIDE THIS FUNCTION
 // TODO : specify parameter type(s) and return type(s)
@@ -33,8 +33,21 @@ pub fn validate_file_uuid(path: &str, uuid: &str) -> bool {
         }
     };
     let buffer = file_data.as_slice();
-    let file_uuid = Uuid::new_v5(&Uuid::NAMESPACE_OID, buffer);
-    let file_uuid = file_uuid.to_string();
+    let file_uuid = Uuid::new_v5(&Uuid::NAMESPACE_OID, buffer).to_string();
+
+    match Uuid::try_parse(uuid) {
+        Ok(uuid) => match uuid.get_version() {
+            Some(Version::Sha1) => (),
+            _ => {
+                println!("Invalid UUID version\n");
+                return false;
+            }
+        },
+        Err(err) => {
+            println!("{}\n", err);
+            return false;
+        }
+    }
 
     file_uuid.eq(uuid)
 }
@@ -73,9 +86,33 @@ mod tests {
     }
 
     #[test]
-    fn validate_file_uuid_filepath_error() {
+    fn validate_file_invalid_uuid_format_error() {
+        let uuid = "e996c5f6-0f27-557a-858e-798da75f427";
+        let path = "files/file_example_JPG_500kB.jpg";
+
+        assert_eq!(validate_file_uuid(path, uuid), false);
+    }
+
+    #[test]
+    fn validate_file_invalid_uuid_error() {
+        let uuid = "e996c5f6-0f27-557a-858e-798da75ff42b";
+        let path = "files/file_example_JPG_500kB.jpg";
+
+        assert_eq!(validate_file_uuid(path, uuid), false);
+    }
+
+    #[test]
+    fn validate_file_uuid_invalid_filepath_error() {
         let uuid = "e996c5f6-0f27-557a-858e-798da75ff427";
         let path = "files/file_example_JPG_500kB.jpeg";
+
+        assert_eq!(validate_file_uuid(path, uuid), false);
+    }
+
+    #[test]
+    fn validate_file_uuid_wrong_version_error() {
+        let uuid = "20354d7a-e4fe-47af-8ff6-187bca92f3f9";
+        let path = "files/file_example_JPG_500kB.jpg";
 
         assert_eq!(validate_file_uuid(path, uuid), false);
     }

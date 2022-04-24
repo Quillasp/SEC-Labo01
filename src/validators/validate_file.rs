@@ -53,6 +53,13 @@ mod tests {
     }
 
     #[test]
+    fn validate_file_image_with_wrong_extension_error() {
+        let path = "files/file_example_JPG_500kB.jpeg";
+
+        assert_eq!(validate_file(path, true), false);
+    }
+
+    #[test]
     fn validate_file_video_ok() {
         let path = "files/file_example_AVI_480_750kB.avi";
 
@@ -60,16 +67,30 @@ mod tests {
     }
 
     #[test]
+    fn validate_file_video_with_extension_ok() {
+        let path = "files/file_example_AVI_480_750kB.avi";
+
+        assert_eq!(validate_file(path, true), true);
+    }
+
+    #[test]
     fn validate_file_image_no_extension_error() {
         let path = "files/file_example_JPG_500kB";
 
-        assert_eq!(validate_file(path, false), false)
+        assert_eq!(validate_file(path, false), false);
     }
 
     #[test]
     fn validate_file_not_enough_perm_error() {
         let path = "/etc/shadow";
 
-        assert_eq!(validate_file(path, false), false)
+        assert_eq!(validate_file(path, false), false);
+    }
+
+    #[test]
+    fn validate_file_reject_file_type_error() {
+        let path = "files/file_example_MP3_700KB.mp3";
+
+        assert_eq!(validate_file(path, false), false);
     }
 }
